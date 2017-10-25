@@ -1,0 +1,10 @@
+{
+    "__default__" :
+    {
+        "h_rt"  : "h_rt=00:10:00",
+        "mfree" : "mfree=5G",
+        "pe"    : "serial 1",
+        "q"     : "eichler-short.q",
+        "diskf" : "disk_free=1G"
+     },
+}

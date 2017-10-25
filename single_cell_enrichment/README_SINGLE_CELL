@@ -1,0 +1,12 @@
+grep -w -f radial_glia_sig_down.genes.txt ~zevk/shared_resources/assemblies/hg38/genes/refGene.bed12  | perl -lane 'print join "\t", @F[0..4]' | sort -k1,1 -k2,2n | uniq | bedtools subtract -A -a - -b ../../../indel_analysis/smartie/data/hg38_low_confidence_regions.bed | grep -v "_alt" > radial_glia_sig_down.genes.bed12.bed
+grep -w -f radial_glia_sig_up.genes.txt ~zevk/shared_resources/assemblies/hg38/genes/refGene.bed12   | perl -lane 'print join "\t", @F[0..4]' | sort -k1,1 -k2,2n | uniq |  bedtools subtract -A -a - -b ../../../indel_analysis/smartie/data/hg38_low_confidence_regions.bed | grep -v "_alt" > radial_glia_sig_up.genes.bed12.bed
+
+grep -w -f ex_sig_down.genes.txt ~zevk/shared_resources/assemblies/hg38/genes/refGene.bed12  | perl -lane 'print join "\t", @F[0..4]' | sort -k1,1 -k2,2n | uniq | bedtools subtract -A -a - -b ../../../indel_analysis/smartie/data/hg38_low_confidence_regions.bed | grep -v "_alt"  > ex_sig_down.genes.bed12.bed
+grep -w -f ex_sig_up.genes.txt ~zevk/shared_resources/assemblies/hg38/genes/refGene.bed12  | perl -lane 'print join "\t", @F[0..4]' | sort -k1,1 -k2,2n | uniq | bedtools subtract -A -a - -b ../../../indel_analysis/smartie/data/hg38_low_confidence_regions.bed   | grep -v "_alt" > ex_sig_up.genes.bed12.bed
+
+
+
+perl -lane '$F[1] -= 50000; $F[2] += 50000; print join "\t", @F ' ex_sig_down.genes.bed12.bed > ex_sig_down.genes.bed12.fat.bed
+perl -lane '$F[1] -= 50000; $F[2] += 50000; print join "\t", @F ' ex_sig_up.genes.bed12.bed > ex_sig_up.genes.bed12.fat.bed
+perl -lane '$F[1] -= 50000; $F[2] += 50000; print join "\t", @F ' radial_glia_sig_down.genes.bed12.bed > radial_glia_sig_down.genes.bed12.fat.bed
+perl -lane '$F[1] -= 50000; $F[2] += 50000; print join "\t", @F ' radial_glia_sig_up.genes.bed12.bed > radial_glia_sig_up.genes.bed12.fat.bed

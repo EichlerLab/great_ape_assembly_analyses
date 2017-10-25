@@ -1,0 +1,51 @@
+
+shell.prefix("source config.sh; set -eo pipefail ; ")
+
+configfile: "config.json"
+
+SV_BED="SVS_for_per.bed"
+EXCLUDE="hg38_low_confidence_regions.bed"
+
+#TYPES="polymorphic human_specific gorilla_specific orangutan_specific chimpanzee_specific".split()
+TYPES="human_specific".split()
+
+def _get_target_files(wildcards):
+    return config[wildcards.target]
+
+region_file="tmp.txt"
+REPS=[line.rstrip('\n') for line in open(region_file)]
+
+rule collect:
+     input: F1=expand("raw/{type}/{rep}.{target}.txt", rep=REPS, type=TYPES, target=config.keys()), F2=expand("obs/{type}/{target}.txt", type=TYPES, target=config.keys())
+     shell: """
+
+            cat {input.F1} > results.txt
+            cat {input.F2} > results_obs.txt
+     """
+
+rule per:
+     input:  TG=_get_target_files, SV=SV_BED, EX=EXCLUDE, OBS="obs/{type}/{target}.txt"
+     output: "raw/{type}/{rep}.{target}.txt"
+
+     shell: """
+
+     grep {wildcards.type} {input.SV} > $TMPDIR/sv.type.bed
+
+ bedtools shuffle -i $TMPDIR/sv.type.bed -g genome_lite.txt -excl {input.EX} -noOverlapping > $TMPDIR/scabled.sv.bed
+
+ bedtools intersect -wa  -b $TMPDIR/scabled.sv.bed -a {input.TG} | wc -l | perl -lane 'print "$_\\t{wildcards.rep}\\t{wildcards.type}\\t{wildcards.target}"' > {output}
+
+
+"""
+
+rule obs:
+     input:  TG=_get_target_files, SV=SV_BED, EX=EXCLUDE
+     output: "obs/{type}/{target}.txt", "obs/{type}/{target}.res.bed"
+     shell: """
+
+      grep {wildcards.type} {input.SV} > $TMPDIR/sv.type.bed
+      bedtools intersect -wa  -b $TMPDIR/sv.type.bed -a {input.TG} | wc -l | perl -lane 'print "$_\\tNA\\t{wildcards.type}\\t{wildcards.target}"' > {output[0]}
+
+      bedtools intersect -wao -b $TMPDIR/sv.type.bed -a {input.TG} | perl -lane 'print if $F[-1] > 0'  > {output[1]}
+
+"""
