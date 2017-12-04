@@ -1,0 +1,6 @@
+[submodule "invcheck"]
+	path = invcheck
+	url = https://github.com/mchaisso/invcheck
+[submodule "mcutils"]
+	path = mcutils
+	url = https://github.com/mchaisso/mcutils

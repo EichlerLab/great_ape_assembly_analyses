@@ -1,0 +1,8 @@
+{
+"panTro" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-panTro4-aligned.sam",
+"chm13" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-chm13-aligned.sam",
+"clint" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-clint-aligned.sam",
+"gor" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-susie-aligned.sam",
+"ppy" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-ppy-aligned.sam",
+"yri" : "/net/eichler/vol18/zevk/great_apes/smartie/mappings/hg38-yri-aligned.sam",
+}

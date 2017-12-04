@@ -1,0 +1,38 @@
+shell.prefix("source config.sh; set -eo pipefail ; ")
+configfile: "config2.json"
+
+GENOMES="chm13 clint ppy gor yri panTro".split()
+
+def _get_target_files(wildcards):
+    return config[wildcards.genomes]
+
+rule getResults:
+        input: expand("raw_beds/{genomes}.bed", genomes=GENOMES)
+#     input: expand("sort_merged/{genomes}.inv.txt", genomes=GENOMES), expand("raw_beds/{genomes}.bed", genomes=GENOMES)
+
+rule sort_merge:
+     input: "raw_calls/{genomes}.inv.txt"
+     output: "sort_merged/{genomes}.inv.txt"
+     shell: """
+
+       cat {input} | perl -lane '@Z = split /:|-/, $F[3]; $F[5] += $Z[1] ; $F[6] += $Z[1] ; $F[3] = $Z[0]; push @F, "$F[3]:$F[5]:$F[6]:$F[4]" ; print join "\\t", @F' | sort -k1,1 -k2,2n | bedtools merge -i - -c 8 -o first | perl -lane '@Z = split /:/, $F[-1]; pop @F; push @F, "inversion"; push @F, $Z[3]; push @F, $Z[0]; push @F, $Z[1]; push @F, $Z[2]; print join "\\t", @F ' | perl -lane 'push @F, split /:/, $F[-1]; print join "\\t", @F' | perl -lane 'pop @F; print join "\t", @F ' > {output}
+
+
+     """
+
+rule Sam2bed:
+        message: "sam to beds"
+        input: BAM=_get_target_files
+        output: "raw_beds/{genomes}.bed"
+        shell: """
+
+        ~mchaisso/projects/mcutils/bin/samToBed {input} > {output}
+        """
+
+rule findInv:
+     message: "Finding INVs"
+     input: BAM=_get_target_files
+     output: "raw_calls/{genomes}.inv.txt"
+     shell: """
+     /net/eichler/vol5/home/mchaisso/projects/PacBioSequencing/scripts/Inversions/screenInversions {input} ~/shared_resources/assemblies/hg38/ucsc.hg38.no_alts.fasta  {output} -j 5 -w 2000 -r --noClip  2> {wildcards.genomes}.err
+     """
